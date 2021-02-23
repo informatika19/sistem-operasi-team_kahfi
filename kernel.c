@@ -2,6 +2,9 @@ void handleInterrupt21 (int AX, int BX, int CX, int DX);
 void printString(char *string);
 void readString(char *string);
 void clear(char *buffer, int length); //Fungsi untuk mengisi buffer dengan 0
+int div(int a, int b);
+int mod(int x, int y);
+
 
 int main() {
   char *startup = "www";
