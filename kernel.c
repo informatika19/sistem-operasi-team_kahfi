@@ -75,3 +75,10 @@ int div(int a, int b){
 	}
 	return q;
 }
+
+int mod(int x, int y) {
+    int i;
+    for (i=x; i>=y; i=i-y) {
+    }
+    return i;
+}
