@@ -13,9 +13,8 @@ Beberapa fungsi yang diimplementasikan pada `kernel.asm` adalah:
 `_interrupt21ServiceRoutine`
 
 `_putInMemory` merupakan fungsi untuk menyimpan character dalam segmen dan offset tertentu.
-Beberapa parameter dari fungsi ini adalah: segment yang merupakan most significant hex digit dari address yang dikali 0x1000,
-offset yang merupakan empat digit least significant hex digit dari address, dan
-b yang merupakan ASCII code dari karakter yang ingin ditulis.
+Fungsi ini menerima parameter berupa segment, offset, dan character.
+Segment merupakan most significant hex digit dari address dikali 0x1000, offset merupakan empat digit least significant hex digit dari address, dan character merupakan ASCII code dari karakter yang ingin disimpan. Character tersebut akan disimpan dalam segment dan offset yang sesuai dengan parameter pada fungsi ini.
 
 `_interrupt` merupakan fungsi untuk menginterrupt sebuah perintah dengan number tertentu.
 Setelah mendapatkan interrupt number tersebut, kita dapat memanggil perintah yang sesuai dengan interrupt numbernya.
