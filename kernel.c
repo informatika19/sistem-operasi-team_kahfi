@@ -70,8 +70,8 @@ void clear (char *buffer, int length) {
 }
 
 int div(int a, int b){
-  int q;
-  for(q = 0 ;(q + 1) * b <= a;q++){		
+	int q;
+	for(q = 0 ;(q + 1) * b <= a;q++){		
 	}
 	return q;
 }
