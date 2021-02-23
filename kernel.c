@@ -68,3 +68,10 @@ void clear (char *buffer, int length) {
     buffer[i] = 0x0;
   }
 }
+
+int div(int a, int b){
+  int q;
+  for(q = 0 ;(q + 1) * b <= a;q++){		
+	}
+	return q;
+}
