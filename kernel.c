@@ -45,30 +45,20 @@ char *new = '\n';
 
 void readString(char *string) {
   int count = 0;
-  int inputkar = 0;
+  int reading = 1;
 
-  while (1) {
-    // get char
-    inputkar = interrupt(0x16, 0, 0, 0, 0);
-    if (inputkar == 13) { //menerima clear
-      string[count] = 0; //null
-      string[count + 1] = 13; //clear
-      string[count + 2] = 10; //lf
-      interrupt(0x10, 0xe*256+13, 0, 0, 0);
-      interrupt(0x10, 0xe*256+10, 0, 0, 0);
-      return;
-    } else if (inputkar == 8) { //backspace
-      if (count > 0) {
-        string[count] = 0;
-        count--; //dihapus
-        interrupt(0x10, 0xe*256+8, 0, 0, 0); 
-        interrupt(0x10, 0xe*256+0, 0, 0, 0);
-        interrupt(0x10, 0xe*256+8, 0, 0, 0);
-      }
+  while (reading) {
+        char c = interrupt(0x16, 0, 0, 0, 0);
+        if (c == '\r') { // Return/Enter
+            interrupt(0x10, 0xE00 + '\r', 0, 0, 0);
+            interrupt(0x10, 0xE00 + '\n', 0, 0, 0);
+            (*string) = '\0';
+            reading = 0;
     } else {
-      string[count] = inputkar; //menerima inputan
-      count++;
-      interrupt(0x10, 0xe*256+inputkar, 0, 0, 0);
+            interrupt(0x10, 0xE00 + c, 0, 0, 0);
+            (*string) = c;
+            string++;
+            count++;
     }
   }
 }
