@@ -5,16 +5,16 @@ bootloader_asm=bootloader.asm
 
 out=out
 
-sys_img=$(out)/system.img
-bootloader=$(out)/bootloader
-kernel_o=$(out)/kernel.o
-kernel_asm_o=$(out)/kernel_asm.o
-kernel=$(out)/kernel
+sys_img=system.img
+bootloader=bootloader
+kernel_o=kernel.o
+kernel_asm_o=kernel_asm.o
+kernel=kernel
 
-$(out):
-	mkdir $(out)
+#$(out):
+#	mkdir $(out)
 
-$(sys_img): $(out) $(bootloader) $(kernel)
+$(sys_img): $(bootloader) $(kernel)
 	dd if=/dev/zero of=$@ bs=512 count=2880
 	dd if=$(bootloader) of=$@ bs=512 conv=notrunc count=1
 	dd if=$(kernel) of=$@ bs=512 conv=notrunc seek=1
@@ -22,10 +22,10 @@ $(sys_img): $(out) $(bootloader) $(kernel)
 $(bootloader): $(bootloader_asm)
 	nasm $< -o $@
 
-$(kernel_o): $(kernel_c) $(out)
+$(kernel_o): $(kernel_c) 
 	bcc -ansi -c -o $@ $<
 
-$(kernel_asm_o): $(kernel_asm) $(out)
+$(kernel_asm_o): $(kernel_asm)
 	nasm -f as86 $< -o $@
 
 $(kernel): $(kernel_o) $(kernel_asm_o)
