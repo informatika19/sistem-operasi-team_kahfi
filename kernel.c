@@ -8,9 +8,10 @@ int mod(int x, int y);
 
 
 int main() {
-  //char *startup = "www";
+  char *startup = "www";
   //printString(startup);
   logoHMIF();
+  readString(startup);
   makeInterrupt21();
   while (1);
 }
@@ -46,6 +47,7 @@ char *new = '\n';
 void readString(char *string) {
   int count = 0;
   int reading = 1;
+  char back = '\b';
 
   while (reading) {
         char c = interrupt(0x16, 0, 0, 0, 0);
@@ -54,6 +56,15 @@ void readString(char *string) {
             interrupt(0x10, 0xE00 + '\n', 0, 0, 0);
             (*string) = '\0';
             reading = 0;
+    } else if (c == '\b') {
+            if (count > 0) {
+                interrupt(0x10, 0xE00 + '\b', 0, 0, 0);
+                interrupt(0x10, 0xE00 + '\0', 0, 0, 0);
+                interrupt(0x10, 0xE00 + '\b', 0, 0, 0);
+                (*string) = '\0';
+                string--;
+                count--;
+            }
     } else {
             interrupt(0x10, 0xE00 + c, 0, 0, 0);
             (*string) = c;
