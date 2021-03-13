@@ -37,12 +37,12 @@ void handleInterrupt21 (int AX, int BX, int CX, int DX) {
     case 0x03: 
       writeSector(BX, CX); 
       break; 
-    /* case 0x04: 
+    case 0x04: 
       readFile(BX, CX, DX, AH); 
       break; 
     case 0x05: 
       writeFile(BX, CX, DX, AH); 
-      break; */
+      break;
     default: 
       printString("Invalid interrupt"); 
   } 
@@ -123,6 +123,23 @@ void readSector(char *buffer, int sector) {
 void writeSector(char *buffer, int sector) {
   interrupt(0x03, 0x301, buffer, div(sector, 36) * 0x100 + mod(sector, 18) 
   + 1, mod(div(sector, 18), 2) * 0x100);
+}
+
+void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
+  char map[512];
+  char dir[512];
+
+  readSector(map, 0x100);
+  readSector(dir, 0x103);
+}
+
+void readFile(char *buffer, char *path, int *result, char parentIndex) {
+  char dir[512];
+  char entry;
+
+  readSector(dir, 0x103);
+  entry = dir[0];
+
 }
 
 void logoHMIF() {

@@ -1,58 +1,84 @@
-BOCHS ?= bochs
-kernel_c=kernel.c
-kernel_asm=kernel.asm
-bootloader_asm=bootloader.asm
+#all: library.cpp main.cpp
 
-out=out
+#In this case:
 
-sys_img=$(out)/system.img
-map_img=$(out)/map.img
-files_img=$(out)/files.img
-sectors_img=$(out)/sectors.img
-bootloader=$(out)/bootloader
-kernel_o=$(out)/kernel.o
-kernel_asm_o=$(out)/kernel_asm.o
-kernel=$(out)/kernel
+    #$@ evaluates to all
+    #$< evaluates to library.cpp
+    #$^ evaluates to library.cpp main.cpp
 
-$(out):
-	mkdir $(out)
+CC = bcc
+DD = dd
+LD = ld86
+BOCHS = bochs
+AS = nasm
+PY = python3
 
-$(sys_img): $(out) $(bootloader) $(kernel) $(map_img) $(files_img) $(sectors_img)
-	dd if=/dev/zero of=$@ bs=512 count=2880
-	dd if=$(bootloader) of=$@ bs=512 conv=notrunc count=1
-	dd if=$(kernel) of=$@ bs=512 conv=notrunc seek=1
-	dd if=$(map_img) of=$@ bs=512 count=1 seek=256 conv=notrunc
-	dd if=$(files_img) of=$@ bs=512 count=2 seek=257 conv=notrunc
-	dd if=$(sectors_img) of=$@ bs=512 count=1 seek=259 conv=notrunc
+ASM_DIR = src/asm
+C_DIR = src/c
+OUT_DIR = out
+LIB_DIR = $(C_DIR)/lib
 
+BOOTLOADER_OUT = $(OUT_DIR)/bootloader
+BOOTLOADER_ASM = $(ASM_DIR)/bootloader.asm
 
-$(bootloader): $(bootloader_asm)
-	nasm $< -o $@
+LIB_C = $(wildcard $(LIB_DIR)/*.c)
+LIB_C_OUT = $(patsubst $(LIB_DIR)/%.c, $(OUT_DIR)/%.o, $(LIB_C))
+LIB_ASM = $(ASM_DIR)/lib.asm
+LIB_ASM_OUT = $(OUT_DIR)/lib_asm.o
 
-$(kernel_o): $(kernel_c) $(out) 
-	bcc -ansi -c -o $@ $<
+KERNEL_C = $(C_DIR)/kernel.c
+KERNEL_ASM = $(ASM_DIR)/kernel.asm
+KERNEL_C_OUT = $(OUT_DIR)/kernel.o
+KERNEL_ASM_OUT = $(OUT_DIR)/kernel_asm.o
+KERNEL = $(OUT_DIR)/kernel
 
-$(kernel_asm_o): $(kernel_asm) $(out)
-	nasm -f as86 $< -o $@
+OS = $(OUT_DIR)/system.img
+MAP = $(OUT_DIR)/map.img
+FILES = $(OUT_DIR)/files.img
+SECTORS = $(OUT_DIR)/sectors.img
 
-$(kernel): $(kernel_o) $(kernel_asm_o)
-	ld86 -o $@ -d $^
+BOCHS_CONFIG = if2230.config
 
-$(map_img): $(out)
-	dd if=/dev/zero of=$@ bs=512 count=1
+default: image
 
-$(files_img): $(out)
-	dd if=/dev/zero of=$@ bs=512 count=2
+$(OUT_DIR):
+	mkdir $@
 
-$(sectors_img): $(out)
-	dd if=/dev/zero of=$@ bs=512 count=1
+$(BOOTLOADER_OUT): $(BOOTLOADER_ASM)
+	$(AS) -o $@ $<
 
-build: $(sys_img)
+$(OUT_DIR)/%.o: $(LIB_DIR)/%.c
+	$(CC) -ansi -c -o $@ $<
 
-run: build
-	$(BOCHS) -f if2230.config
+$(LIB_ASM_OUT): $(LIB_ASM)
+	$(AS) -f as86 -o $@ $<
+
+$(KERNEL_C_OUT): $(KERNEL_C)
+	$(CC) -ansi -c -o $@ $<
+
+$(KERNEL_ASM_OUT): $(KERNEL_ASM)
+	$(AS) -f as86 -o $@ $<
+
+$(KERNEL): $(KERNEL_C_OUT) $(LIB_C_OUT) $(KERNEL_ASM_OUT) $(LIB_ASM_OUT)
+	# Urutan linker ternyata ngaruh :O
+	$(LD) -o $@ -d $^
+
+img: $(OUT_DIR) $(BOOTLOADER_OUT) $(KERNEL)
+	$(DD) if=/dev/zero of=$(OS) bs=512 count=2880
+	$(DD) if=/dev/zero of=$(MAP) bs=512 count=1
+	$(DD) if=/dev/zero of=$(FILES) bs=512 count=2
+	$(DD) if=/dev/zero of=$(SECTORS) bs=512 count=1
+	$(PY) -c "import sys; sys.stdout.buffer.write(b'\xFF'*10)" | $(DD) conv=notrunc bs=10 count=1 of=$(MAP)
+	$(DD) if=$(BOOTLOADER_OUT) of=$(OS) bs=512 count=1 conv=notrunc
+	$(DD) if=$(KERNEL) of=$(OS) bs=512 conv=notrunc seek=1
+	$(DD) if=$(MAP) of=$(OS) bs=512 conv=notrunc seek=256
+	$(DD) if=$(FILES) of=$(OS) bs=512 conv=notrunc seek=257
+	$(DD) if=$(SECTORS) of=$(OS) bs=512 conv=notrunc seek=259
+
+image: img
+
+run: img
+	$(BOCHS) -f $(BOCHS_CONFIG)
 
 clean:
 	rm -rf out/*
-
-.PHONY: build run clean
