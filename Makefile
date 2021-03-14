@@ -7,6 +7,7 @@
     #$^ evaluates to library.cpp main.cpp
 
 CC = bcc
+GCC = gcc
 DD = dd
 LD = ld86
 BOCHS = bochs
