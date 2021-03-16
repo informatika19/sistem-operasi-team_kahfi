@@ -120,7 +120,7 @@ int main() {
 
 			executeProg(arg, 0xFF);
 		} else {
-			interrupt(0x21, 0x00, "Invalid Command!\r\n", 0, 0);
+			interrupt(0x21, 0x00, "Your command is invalid\r\n", 0, 0);
 			executeBin(input);
 		}
 	}
@@ -141,10 +141,10 @@ void executeBin(char* cmd) {
 	i = 0;
 	while(isMatch == 0 && i < 64) {
 		if( files[i*16] == 0xFF&&files[16*i] == 0x01) {
-			interrupt(0x21, 0, "File ketemu bro! Nama filenya : \0", 0, 0);
+			interrupt(0x21, 0, "Your file is found! File: \0", 0, 0);
 			interrupt(0x21, 0, files + (i*16) + 2, 0, 0);
 			if(strcmp(files + i*16 + 2, cmd)) {
-				interrupt(0x21, 0, "File cocok!\r\n\0",0,0);
+				interrupt(0x21, 0, "File is suitable\r\n\0",0,0);
 				isMatch = 1;
 			}
 		}
@@ -153,7 +153,7 @@ void executeBin(char* cmd) {
 	if(isMatch == 1) {
 		executeProg(cmd, curdir);
 	} else{
-		interrupt(0x21, 0, "Gada file kek gitu udahh..\r\n\0",0,0);
+		interrupt(0x21, 0, "Nothing\r\n\0",0,0);
 	}
 }
 
@@ -345,9 +345,9 @@ void ls(char parentIndex) {
 			h = 0;
 			idxName = k * 16 + 2;
 			if (files[k * 16 + 1] == 0XFF) {
-				interrupt(0x21, 0x00, "(dir)  ", 0, 0);
+				interrupt(0x21, 0x00, "Dir:  ", 0, 0);
 			} else {
-				interrupt(0x21, 0x00, "(file) ", 0, 0);
+				interrupt(0x21, 0x00, "File: ", 0, 0);
 			}
 			while (h < 14 && files[idxName + h] != '\0') {
 				interrupt(0x10, 0xE00 + files[h + idxName], 0, 0, 0);
