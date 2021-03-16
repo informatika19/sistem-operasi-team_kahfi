@@ -1,8 +1,8 @@
 void ls(char parentIndex);
-void execProg(char* progName, char parentIndex);
+void executeProg(char* progName, char parentIndex);
 int cd(char* cmd, int idxDir);
-unsigned char compareStr(char* strA, char* strB);
-int compareStrN(char* strA, char* strB, int n);
+unsigned char strcmp(char* string1, char* string2);
+int strcmpN(char* string1, char* string2, int n);
 int searchPath(char* dirCall, int parentIndex);
 void getCommand(char* input);
 void executeBin(char* cmd);
@@ -35,7 +35,7 @@ int main() {
 		do {
 			interrupt(0x21, 0x2, directoryBuffer, 0x101, 0);
 			interrupt(0x21, 0x2, directoryBuffer + 512, 0x102, 0);
-			interrupt(0x21, 0x00, "Root", 0, 0);
+			interrupt(0x21, 0x00, "root", 0, 0);
 			if (!(dirBack == 0)) {
 				while (!(curDirName[itrDirName] == '/')) {
 					curDirName[itrDirName--] = '\0';
@@ -47,14 +47,18 @@ int main() {
 			interrupt(0x21, 0x00, curDirName, 0, 0);
 			interrupt(0x21, 0x00, ">", 0, 0);
 			interrupt(0x21, 0x01, input, 1, 0);
-		} while (compareStr(input, ""));
+		} while (strcmp(input, ""));
 		interrupt(0x21, 0x00, "\r\n", 0, 0);
 		
-		if (compareStrN(input, "cat", 3)) {
+		if (strcmpN(input, "cat", 3)) {
 			i = 4;
 			while (i < 18) {
-				if (input[i] == '\0') break;
-				else arg[i - 4] = input[i];
+				if (input[i] == '\0') {
+					break;
+				}
+				else {
+					arg[i - 4] = input[i];
+				}
 				i++;
 			}
 
@@ -70,14 +74,17 @@ int main() {
 
 			interrupt(0x21, 0x03, dirAndName, 512, 0);
 			interrupt(0x21, 0x06, "cat", 0x2000, &isSuccess);
-		} else if (compareStrN(input, "ls", 2)) {
-			// interrupt(0x21, 0x00, "ls\r\n", 0, 0);
+		} else if (strcmpN(input, "ls", 2)) {
 			ls(curdir);
-		} else if (compareStrN(input, "rm", 2)) {
+		} else if (strcmpN(input, "rm", 2)) {
 			i = 3;
 			while (i < 17) {
-				if (input[i] == '\0') break;
-				else arg[i - 3] = input[i];
+				if (input[i] != '\0') {
+					arg[i - 3] = input[i];
+				}
+				else {
+					break;
+				}
 				i++;
 			}
 
@@ -93,8 +100,7 @@ int main() {
 
 			interrupt(0x21, 0x03, dirAndName, 512, 0);
 			interrupt(0x21, 0x06, "rm", 0x2000, &isSuccess);
-		} else if (compareStrN(input, "./", 2)) {
-			// interrupt(0x21, 0x00, "masuk if exec\r\n", 0, 0);
+		} else if (strcmpN(input, "./", 2)) {
 			i = 2;
 			while (i < 16 ) {
 				if (input[i] == '\0') {
@@ -112,57 +118,7 @@ int main() {
 			interrupt(0x21, 0x00, arg, 0, 0);
 			interrupt(0x21, 0x00, "\r\n", 0, 0);
 
-			execProg(arg, 0xFF);
-		} else if(compareStrN(input,"mkdir",5)) {
-			i = 6;
-			while (i < 20 ) {
-				if (input[i] == '\0') {
-					break;
-				} else {
-					arg[i - 6] = input[i];
-				}
-				i++;
-			}
-
-			while (i < 20) {
-				arg[i-6] = '\0';
-				i++;
-			}
-
-			dirAndName[0] = curdir;
-			for (i = 0; i < 14; i++) {
-				dirAndName[i + 1] = arg[i];
-			}
-
-			interrupt(0x21, 0x03, dirAndName, 512, 0);
-			interrupt(0x21, 0x06, "mkdir", 0x2000, &isSuccess);
-		} else if(compareStrN(input,"cd", 2)) {
-			i = 3;
-			while (i < 17 ) {
-				if (input[i] == '\0') {
-					break;
-				} else {
-					arg[i - 3] = input[i];
-				}
-				i++;
-			}
-
-			while (i < 17) {
-				arg[i-3] = '\0';
-				i++;
-			}
-
-			curdir = cd(arg, curdir);
-		} else if(compareStrN(input,"mv", 2)) {
-			i = 3;
-			dirAndName[0] = curdir;
-			while (input[i] != '\0') {
-				dirAndName[i - 2] = input[i];
-				i++;
-			}
-
-			interrupt(0x21, 0x03, dirAndName, 512, 0);
-			interrupt(0x21, 0x06, "mv", 0x2000, &isSuccess);
+			executeProg(arg, 0xFF);
 		} else {
 			interrupt(0x21, 0x00, "Invalid Command!\r\n", 0, 0);
 			executeBin(input);
@@ -187,7 +143,7 @@ void executeBin(char* cmd) {
 		if( files[i*16] == 0xFF&&files[16*i] == 0x01) {
 			interrupt(0x21, 0, "File ketemu bro! Nama filenya : \0", 0, 0);
 			interrupt(0x21, 0, files + (i*16) + 2, 0, 0);
-			if(compareStr(files + i*16 + 2, cmd)) {
+			if(strcmp(files + i*16 + 2, cmd)) {
 				interrupt(0x21, 0, "File cocok!\r\n\0",0,0);
 				isMatch = 1;
 			}
@@ -195,7 +151,7 @@ void executeBin(char* cmd) {
 		++i;
 	}
 	if(isMatch == 1) {
-		execProg(cmd, curdir);
+		executeProg(cmd, curdir);
 	} else{
 		interrupt(0x21, 0, "Gada file kek gitu udahh..\r\n\0",0,0);
 	}
@@ -247,32 +203,19 @@ int cd(char* cmd, int idxDir) {
 		++i;
 	}
 	if(cont) {
-		// interrupt(0x21, 0, "Masuk B!\r\n",0,0);
-		// interrupt(0x21, 0, directory,0,0);
-		// interrupt(0x21, 0, "\r\n",0,0);
 		val = searchPath(directory, initDir);
 		if(val == 0x100) {
-			// interrupt(0x21, 0, "Folder ga ketemu bro B!\r\n",0,0);
-			// interrupt(0x21, 0, directory,0,0);
-			// interrupt(0x21, 0, "\r\n\0", 0, 0);
 			cont = 0;
 		} else {
-			// interrupt(0x21, 0, "Folder ketemu bro A!\r\n",0,0);
-			// interrupt(0x21, 0, directory,0,0);
-			// interrupt(0x21, 0, "\r\n\0", 0, 0);
 			interrupt(0x21, 0, "Masuk sini bro2!\r\n",0,0);
-				// interrupt(0x21, 0, directory,0,0);
-				// interrupt(0x21, 0, "\r\n\0", 0, 0);
 			if (dirBack ==0) {
 				initDir = val;
 				curDirName[itrDirName++] = '/';
 				k = 0;
 				while (k < 14 ) {
 					if (directoryBuffer[initDir * 16 + 2 + k] == '\0') {
-						// interrupt(0x21, 0x00, "bye loop\r\n", 0, 0);
 						break;
 					} else {
-						// interrupt(0x21, 0x00, "masukkin char\r\n", 0, 0);
 						curDirName[itrDirName + k] = directoryBuffer[k + initDir * 16 + 2];
 						k++;
 					}
@@ -283,9 +226,6 @@ int cd(char* cmd, int idxDir) {
 			dirChange = 1;
 		}
 		cnt = 0;
-		// for(i;i<14; ++i) {
-		// 	directory[i] = 0;
-		// }
 	}
 
 	return initDir;
@@ -295,15 +235,10 @@ int searchPath(char* dirCall, int parentIndex) {
 	char directoryBuffer[1024], filename[14];
 	int i, found, var, h, isNameMatch, k;
 	i=0;
-	// interrupt(0x21, 0, "Masuk searchPath\r\n", 0, 0);
-	// for(i;i<1024;++i) {
-	// 	directoryBuffer[i] = '\0';
-	// }
 	interrupt(0x21, 2, directoryBuffer, 0x101, 0);
 	interrupt(0x21, 2, directoryBuffer+512, 0x102, 0);
 	found = 0;
 	if(dirCall[0] == '.' && dirCall[1] == '.') {
-		// interrupt(0x21, 0, "wah cd .. bro\r\n", 0, 0);
 		if(parentIndex != 0xFF) {
 			var = directoryBuffer[parentIndex*16];
 			dirBack = 1;
@@ -312,13 +247,9 @@ int searchPath(char* dirCall, int parentIndex) {
 		}
 		found = 1;
 	} else {
-		// interrupt(0x21, 0, "Oke cd folder\r\n", 0, 0);
 		i = 0;
 		while (found == 0 && i < 64) {
-			// interrupt(0x21, 0, "Oke cd folder\r\n", 0, 0);
 			if(directoryBuffer[i*16] == parentIndex && directoryBuffer[16 * i+1] == 0xFF){
-				// interrupt(0x21, 0, "Folder ketemu di loop\r\n",0,0);
-				// interrupt(0x21, 0, directoryBuffer + i*16 +2,0,0);
 				h = 0;
 				isNameMatch = 1;
 				for (h = 0; h < 14; h++) {
@@ -353,21 +284,17 @@ int searchPath(char* dirCall, int parentIndex) {
  		}	
 	}
 	if(found) {
-		// interrupt(0x21, 0, "Folder ketemu di akhir\r\n",0,0);
-		// interrupt(0x21, 0, filename,0,0);
-		// interrupt(0x21, 0, "\r\n",0,0);
 		return var;
 	} else {
-		// interrupt(0x21, 0, "Folder tidak ketemu searchPath\r\n",0,0);
 		return 0x100;
 	}
 }
 
-void execProg(char* progName, char parentIndex) {
+void executeProg(char* progName, char parentIndex) {
 	int isFound = 0, k, h, isNameMatch, suc;
 	char files[1024];
 
-	interrupt(0x21, 0, "masuk execProg:(\r\n", 0, 0);
+	interrupt(0x21, 0, "masuk executeProg:(\r\n", 0, 0);
 
 	interrupt(0x21, 0x2, files, 0x101, 0);
 	interrupt(0x21, 0x2, files + 512, 0x102, 0);
@@ -436,36 +363,25 @@ void ls(char parentIndex) {
 	}
 }
 
-unsigned char compareStr(char* strA, char* strB) {
+unsigned char strcmp(char* string1, char* string2) {
 	int i = 0;
 	unsigned char sama = 1;
 	while (i < 128 && sama) {
-		if(strA[i] != strB[i]) {
+		if(string1[i] != string2[i]) {
 			sama = 0;
-		} else if(strA[i] == 0x0 && strB[i] == 0x0) {
+		} else if(string1[i] == 0x0 && string2[i] == 0x0) {
 			i = 128;
 		}
 		++i;
 	}
 	return sama;
-	
-	// i = 0;
-	// while (!(strA[i] == '\0' && strB[i] == '\0')) {
-	// 	if (strA[i] != strB[i]) {
-    //         return 0;
-    //     }
-	// 	++i;
-	// }
-	// return 1;
 }
 
-int compareStrN(char* strA, char* strB, int n) {
+int strcmpN(char* string1, char* string2, int n) {
 	int i = 0;
-	while (!(strA[i] == '\0' && strB[i] == '\0') && i < n) {
-		if (strA[i] != strB[i]) {
+	while (!(string1[i] == '\0' && string2[i] == '\0') && i < n) {
+		if (string1[i] != string2[i]) {
             return 0;
-        }
-		++i;
-	}
-	return 1;
+        } ++i;
+	} return 1;
 }
