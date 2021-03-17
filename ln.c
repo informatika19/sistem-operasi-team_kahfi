@@ -1,26 +1,30 @@
+#include <stdio.h>
+
+// types
 typedef unsigned int   uint;
 typedef unsigned short ushort;
 typedef unsigned char  uchar;
 typedef uint pde_t;
 
+// stat
 #define T_DIR  1   // Directory
 #define T_FILE 2   // File
 #define T_DEV  3   // Device
- 
+
 struct stat {
-short type;  // Type of file
-int dev;     // File system's disk device
-uint ino;    // Inode number
-short nlink; // Number of links to file
-uint size;   // Size of file in bytes
+  short type;  // Type of file
+  int dev;     // File system's disk device
+  uint ino;    // Inode number
+  short nlink; // Number of links to file
+  uint size;   // Size of file in bytes
 };
 
+// user
 struct stat;
-struct rtcdate;
 
 // system calls
 int fork(void);
-int exit(void) __attribute__((noreturn));
+int exit(void);
 int wait(void);
 int pipe(int*);
 int write(int, void*, int);
@@ -41,28 +45,14 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 
-// ulib.c
-int stat(char*, struct stat*);
-char* strcpy(char*, char*);
-void *memmove(void*, void*, int);
-char* strchr(const char*, char c);
-int strcmp(const char*, const char*);
-void printf(int, char*, ...);
-char* gets(char*, int max);
-uint strlen(char*);
-void* memset(void*, int, uint);
-void* malloc(uint);
-void free(void*);
-int atoi(const char*);
-
-
-int main(int argc, char *argv[])
-{
-if(argc != 3){
+int main(int argc, char *argv[]) {
+  if (argc != 3) {
     printf(2, "Usage: ln old new\n");
-    exit();
-}
-if(link(argv[1], argv[2]) < 0)
+    return 0;
+  }
+  
+  if (link(argv[1], argv[2]) < 0)
     printf(2, "link %s %s: failed\n", argv[1], argv[2]);
-exit();
+    
+  return 0;
 }

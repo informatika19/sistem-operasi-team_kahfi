@@ -250,8 +250,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
 				break;
 			}
 			i++;
-		}
-	} else {
+		} else {
 			sudahKetemu = 1;
 
 			for (k=0; k < 1024; k+=16) {
@@ -293,7 +292,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
 
 		*sectors = 1;
 	}
-}
+}}
 
 void executeProgram(char *filename, int segment, int *success) {
 	char bufferFile[16 * 512];

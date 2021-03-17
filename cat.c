@@ -1,18 +1,19 @@
 void readSector(char *buffer, int sector);
 void writeSector(char *buffer, int sector);
-void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
 void readFile(char *buffer, char *path, int *result, char parentIndex);
-void printString(char *string);
+void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
 void readString(char *string);
+void printString(char *string);
+int div(int a, int b);
+int mod(int x, int y);
 
 void main () {
-    char nama[14], tempBuff[512], fileContains[512 * 16], currDir;
+    	char nama[14], tempBuff[512], fileContains[512 * 16], currentDirect;
 	int berhasil, i;
-	berhasil = 0;
 	
 	interrupt(0x21, 0x02, tempBuff, 512, 0);
-    currDir = tempBuff[0];
-    for (i = 0; i < 14; i++) {
+    	currentDirect = tempBuff[0];
+    	for (i = 0; i < 14; i++) {
 		nama[i] = tempBuff[i + 1];
 	}
 
@@ -22,7 +23,8 @@ void main () {
 	}
 
 	//Read fileContains
-	readFile(fileContains, nama, &berhasil, currDir);
+	berhasil = 0;
+	readFile(fileContains, nama, &berhasil, currentDirect);
 
 	if (berhasil != 1) {
 		printString("File not found\r\n\0");
@@ -165,8 +167,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
 				break;
 			}
 			i++;
-		}
-	} else {
+		} else {
 			sudahKetemu = 1;
 
 			for (k=0; k < 1024; k+=16) {
@@ -187,11 +188,11 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
 			}
 		}
 
-	if (!isnamaAlreadyExists) {
-		*sectors = 2;
-		return;
-	} else if (!sudahKetemu) {
+	if (!sudahKetemu) {
 		*sectors = -1;
+		return;
+	} else if (!isnamaAlreadyExists) {
+		*sectors = 2;
 		return;
 	} else {
 		readSector(bufferSector, 0x103);
@@ -208,7 +209,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
 
 		*sectors = 1;
 	}
-}
+}}
 
 void printString(char *string) {
 char *ret = '\r';
@@ -254,4 +255,18 @@ void readString(char *string) {
       count++;
     }
   }
+}
+
+int div(int a, int b){
+	int q;
+	for(q = 0; (q + 1)*b <= a; q++){		
+	}
+	return q;
+}
+
+int mod(int x, int y) {
+  int i;
+  for (i=x; i>=y; i=i-y) {
+  }
+  return i;
 }

@@ -11,21 +11,27 @@ nasm -f as86 kernel.asm -o kernel_asm.o
 ld86 -o kernel -d kernel.o kernel_asm.o
 dd if=kernel of=system.img bs=512 conv=notrunc seek=1
 
-# compile loadfile
+#Compiling loadfile
 gcc loadFile.c -o loadFile
 
-# compile shell
+#Compiling shell
 bcc -ansi -c -o shell.o shell.c
 nasm -f as86 lib.asm -o lib_asm.o
 ld86 -o shell -d shell.o lib_asm.o
 ./loadFile shell
 
-# compile cat
+#Compiling cat
 bcc -ansi -c cat.c -o cat.o
 ld86 -o cat -d cat.o lib_asm.o
 ./loadFile cat
 
+#Compiling ln
+#bcc -ansi -c ln.c -o ln.o
+#ld86 -o ln -d ln.o lib_asm.o
+#./loadFile ln
+
+#Loading test.txt
 ./loadFile test.txt 
 
-# run bochs
+#Running bochs
 echo c | bochs -f if2230.config
