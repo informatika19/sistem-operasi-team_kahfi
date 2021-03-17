@@ -1,14 +1,14 @@
 ;kernel.asm
 ;Michael Black, 2007
-;Modified by Asisten Sister, 2020
+;Modified by Asisten Sister, 2021
 
 ;kernel.asm contains assembly functions that you can use in your kernel
 
 global _putInMemory
 global _interrupt
 global _makeInterrupt21
-global _launchProgram
 extern _handleInterrupt21
+global _launchProgram
 
 ;void putInMemory (int segment, int address, char character)
 _putInMemory:
@@ -79,8 +79,7 @@ _interrupt21ServiceRoutine:
 	pop dx
 
 	iret
-
-
+	
 ;this is called to start a program that is loaded into memory
 ;void launchProgram(int segment)
 _launchProgram:

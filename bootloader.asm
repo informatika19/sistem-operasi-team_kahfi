@@ -1,12 +1,12 @@
 ;bootload.asm
 ;Michael Black, 2007
-;Modified by Asisten Sister, 2020
+;Modified by Asisten Sister, 2021
 
-;This is a simple bootloader that loads and executes a kernel at sector 3
+;This is a simple bootloader that loads and executes a kernel at sector 1
 
 	bits 16
 KSEG	equ	0x1000		;Lokasi kernel = 0x10000
-KSIZE	equ	16		;Ukuran kernel = 16 sektor
+KSIZE	equ	10		;Ukuran kernel = 10 sektor
 KSTART	equ	1		;Lokasi kernel = sektor 1
 
 	;boot loader starts at 0 in segment 0x7c00

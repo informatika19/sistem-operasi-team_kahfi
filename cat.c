@@ -94,10 +94,9 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
 				buffer[ukSektor * j + l] = tempBuf2[l];
 			} ++j;
 		} *result = 1;
-	} else if {
+	} else {
 		*result = -1;
 	}
-	else 
 }
 
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
