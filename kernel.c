@@ -138,8 +138,8 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
 	int j = 0;
 	int namaMatch, k, s, h, l, idxName;
 
-	readSector(&files, 257);
-	readSector(&tempBuf, 258);
+	readSector(&files, 0x101);
+	readSector(&tempBuf, 0x102);
 	for (k = ukSektor; k < ukSektor * 2; k++) {
 		files[k] = tempBuf[k-512];
 	}
