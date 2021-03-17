@@ -2,19 +2,18 @@ void ls(char idxParent);
 int cd(char* command, int idxDir);
 void executeProg(char* namaProgram, char idxParent);
 void executeBin(char* command);
+int lookingpath(char* dirCall, int idxParent);
 unsigned char strcmp(char* string1, char* string2);
 int strcmpN(char* string1, char* string2, int n);
-int lookingpath(char* dirCall, int idxParent);
 
 char curDirName[128], dirBuffer[1024];
 int curdir, dirBack, dirChange, itrDirName;
 curdir = 0xFF;
 
 int main() {
-	char arg[14], dirAndName[512], destDir[14];
+	char dirAndName[512], arg[14], destDir[14];
 	char* input;
-	int berhasils, i;
-	curdir = 0xFF;
+	int berhasil, i;
 	dirBack = 0;
 	dirChange = 0;
 	itrDirName = 0;
@@ -39,9 +38,8 @@ int main() {
 				while (curDirName[itrDirName] != '/') {
 					curDirName[itrDirName--] = '\0';
 				}
-				curDirName[itrDirName] = '\0';
 				dirBack = 0;
-				
+				curDirName[itrDirName] = '\0';
 			}
 			interrupt(0x21, 0x00, curDirName, 0, 0);
 			interrupt(0x21, 0x00, ">", 0, 0);
@@ -52,11 +50,10 @@ int main() {
 		if (strcmpN(input, "cat", 3)) {
 			i = 4;
 			while (i < 18) {
-				if (input[i] == '\0') {
-					break;
-				}
-				else {
+				if (input[i] != '\0') {
 					arg[i-4] = input[i];
+				} else {
+					break;
 				}
 				i++;
 			}
@@ -67,21 +64,20 @@ int main() {
 			}
 
 			dirAndName[0] = curdir;
+
 			for (i = 0; i < 14; i++) {
 				dirAndName[i + 1] = arg[i];
 			}
 
 			interrupt(0x21, 0x03, dirAndName, 512, 0);
-			interrupt(0x21, 0x06, "cat", 0x2000, &berhasils);
-		} else if (strcmpN(input, "ls", 2)) {
-			ls(curdir);
+			interrupt(0x21, 0x06, "cat", 0x2000, &berhasil);
 		} else if (strcmpN(input, "./", 2)) {
 			i = 2;
 			while (i < 16 ) {
-				if (input[i] == '\0') {
-					break;
-				} else {
+				if (input[i] != '\0') {
 					arg[i - 2] = input[i];
+				} else {
+					break;
 				}
 				i++;
 			}
@@ -94,6 +90,8 @@ int main() {
 			interrupt(0x21, 0x00, "\r\n", 0, 0);
 
 			executeProg(arg, 0xFF);
+		} else if (strcmpN(input, "ls", 2)) {
+			ls(curdir);
 		} else {
 			interrupt(0x21, 0x00, "Your command is invalid\r\n", 0, 0);
 			executeBin(input);
@@ -113,8 +111,8 @@ void ls (char idxParent) {
 	countDir = 0;
 	while (i < 64) {
 		if (files[i * 16] == idxParent) {
-			j = 0;
 			idxName = i * 16 + 1;
+			j = 0;
 			if (files[i * 16 + 1] != 0XFF) {
 				interrupt(0x21, 0x00, "File: ", 0, 0);
 			} else {
@@ -135,12 +133,12 @@ void ls (char idxParent) {
 }
 
 int cd (char* command, int idxDir) {
+	int i, cont, cnt, val, init, k;
 	char directory[14];
-	int i, cnt, val, cont, initDir, k;
 	i=0;
-	cnt = 0;
 	cont = 1;
-	initDir = idxDir;
+	cnt = 0;
+	init = idxDir;
 	
 	for (i; i<14; i++) {
 		directory[i] = '\0';
@@ -148,66 +146,67 @@ int cd (char* command, int idxDir) {
 	
 	i = 0;
 	while (command[i] != '\0' && i<128 && cont == 1) {
-		if(command[i] == '/') {
-			val = lookingpath(directory, initDir);
-			if(val == 0x100) {
-				cont = 0;
-			} else {
+		if (command[i] != '/') {
+			directory[cnt] = command[i];
+			cnt++;
+		} else if(command[i] == '/') {
+			val = lookingpath(directory, init);
+			if (val != 0x100) {
 				interrupt(0x21, 0, "You are at this directory.\r\n",0,0);
-				initDir = val;
+				init = val;
 				curDirName[itrDirName++] = '/';
 				k = 0;
 				while (k < 14 ) {
-					if (dirBuffer[initDir * 16 + 2 + k] == '\0') {
+					if (dirBuffer[init * 16 + 2 + k] == '\0') {
 						break;
 					} else {
-						curDirName[itrDirName + k] = dirBuffer[k + initDir * 16 + 2];
+						curDirName[itrDirName + k] = dirBuffer[k + init * 16 + 2];
 						k++;
 					}
 				}
 				itrDirName = itrDirName+k;
+			} else {
+				cont = 0;
 			}
 			cnt = 0;
-		} else if (command[i] != '/') {
-			directory[cnt] = command[i];
-			cnt++;
 		}
 		++i;
 	}
 	if (cont) {
-		val = lookingpath(directory, initDir);
+		val = lookingpath(directory, init);
 		if (val != 0x100) {
 			interrupt(0x21, 0, "You're at this directory\r\n",0,0);
 			if (dirBack == 0) {
-				initDir = val;
 				curDirName[itrDirName++] = '/';
+				init = val;
 				k = 0;
+
 				while (k < 14) {
-					if (dirBuffer[initDir * 16 + 2 + k] == '\0') {
-						break;
-					} else {
-						curDirName[itrDirName + k] = dirBuffer[k + initDir * 16 + 2];
+					if (dirBuffer[init * 16 + 2 + k] != '\0') {
+						curDirName[itrDirName + k] = dirBuffer[k + init * 16 + 2];
 						k++;
+					} else {
+						break;
 					}
 				}
 				itrDirName = itrDirName+k;
 			}
-			initDir = val;
+			init = val;
 			dirChange = 1;
 		} else {
 			cont = 0;
 		}
 		
-		
 		cnt = 0;
 	}
 
-	return initDir;
+	return init;
 }
 
 void executeProg(char* namaProgram, char idxParent) {
-	int isFound = 0, k, h, namaCocok, suc;
-	char files[1024];
+	char files[1024];	
+	int k, h, namaCocok, suc;
+	int boolKetemu = 0;
 
 	interrupt(0x21, 0, "You are entering execute program\r\n", 0, 0);
 
@@ -218,12 +217,12 @@ void executeProg(char* namaProgram, char idxParent) {
 	interrupt(0x21, 0x00, "\r\n", 0, 0);
 
 	k = 0;
-	while (k < 64 && !isFound) {
-		if (files[k * 16] == 0xFF && files[k * 16 + 1] != 0xFF) {
+	while (k < 64 && !boolKetemu) {
+		if (files[k * 16 + 1] != 0xFF && files[k * 16] == 0xFF) {
 			h = 0;
 			namaCocok = 1;
             for (h = 0; h < 14; h++) {
-                if (files[h + k * 16 + 2] == '\0' && namaProgram[h] == '\0') {
+                if (namaProgram[h] == '\0' && files[h + k * 16 + 2] == '\0') {
             		break;
             	} else if (namaProgram[h] != files[h + k * 16 + 2]) {
 	                namaCocok = 0;
@@ -231,21 +230,21 @@ void executeProg(char* namaProgram, char idxParent) {
         	    } 
         	}
 
-        	if (namaCocok) isFound = 1;
+        	if (namaCocok) boolKetemu = 1;
 		}
 		k++;
 	}
 
-	if (!isFound) {
-		interrupt(0x21, 0, "The program is not found\r\n", 0, 0);
+	if (boolKetemu) {
+		interrupt(0x21, 0x06, namaProgram, 0x4000, &boolKetemu);
 	} else {
-		interrupt(0x21, 0x06, namaProgram, 0x4000, &isFound);
+		interrupt(0x21, 0, "The program is not found\r\n", 0, 0);
 	}
 }
 
 void executeBin(char* command) {
-	char cache[8192];
 	char files[1024];
+	char cache[8192];
 	int i, j, cocok, sec;
 	
 	for(i=0;i<1024;++i) {
@@ -266,7 +265,7 @@ void executeBin(char* command) {
 				cocok = 1;
 			}
 		}
-		++i;
+		i++;
 	}
 	
 	if (cocok != 1) {
