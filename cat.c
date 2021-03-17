@@ -55,31 +55,34 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
 	int j = 0;
 	int namaMatch, k, s, h, l, idxName;
 
-	readSector(&files, 257);
-	readSector(&tempBuf, 258);
-	for (k = ukSektor; k < ukSektor * 2; k++) {
-		files[k] = tempBuf[k-512];
+	readSector(&files, 0x101);
+	readSector(&tempBuf, 0x102);
+
+	for (k = ukSektor; k < ukSektor*2; k++) {
+		int k1 = k-512;
+		files[k] = tempBuf[k1];
 	}
 	
 	k = 0;
-	while (k < ukSektor * 2 && !sudahKetemu) {
-        for (k = 0; k < ukSektor * 2; k += 16) {
+	while (!sudahKetemu && k < ukSektor*2) {
+        for (k = 0; k < ukSektor*2; k += 16) {
 			if (files[k] == parentIndex) {
             	if (files[k + 2] != 0x0 && files[k + 1] != 0xFF) {
                 	idxName = k + 2;
                 
                 	namaMatch = 1;
 	                for (h = 0; h < 14; h++) {
-    	                if (files[h + idxName] == '\0' && path[h] == '\0') {
+						int h1 = h+idxName;
+    	                if (files[h1] == '\0' && path[h] == '\0') {
                     		break;
-                    	} else if (path[h] != files[h + idxName]) {
+                    	} else if (path[h] != files[h1]) {
         	                namaMatch = 0;
 							break;
                 	    }
                 	}
 
                 	if (namaMatch) {
-						s = files[k + 1];
+						s = files[k+1];
                     	sudahKetemu = 1;
 						break;
                 	}
@@ -88,31 +91,31 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
 		}
     }
 	
-	if (!sudahKetemu) {
+	if (sudahKetemu) {
+		*result = -1;
+	} else {
 		readSector(&tempBuf,259);
 		while ((tempBuf[j + s * 16] != '\0') && (j < 16)) {
 			readSector(&tempBuf2, tempBuf[j + s * 16]);
-			for(l = 0; l < ukSektor; ++l) {
+			for(l = 0; l < ukSektor; l++) {
 				buffer[ukSektor * j + l] = tempBuf2[l];
-			} ++j;
+			} j++;
 		} *result = 1;
-	} else {
-		*result = -1;
-	}
+	} 
 }
 
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
 	char map[512];
-	char files[1024];
-	int i, hitSektor;
-	char idxParent = parentIndex;
-	int entryIndex;
-	int sudahKetemu, isnamaAlreadyExists, j, k, h, m, isnamaTrue, n;
-	int emptySector;
 	char bufferSector[512];
+	char files[1024];
+	int i, j, k, h, m, n;
+	char parentIdx = parentIndex;
+	int entryIndex;
+	int hitSektor, sektorKosong, sudahKetemu, isnamaAlreadyExists, isnamaTrue;
 
 	readSector(map, 0x100);
-	for (i = 0, hitSektor = 0; i < 256 && hitSektor < *sectors; i++) {
+
+	for (i = 0, hitSektor = 0; hitSektor<*sectors && i < 256; i++) {
 		if (map[i] == 0x00) {
 			hitSektor++;
 		}
@@ -148,7 +151,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
 		k;
 		if (path[i] != '\0') {
 			for (k=0; k < 1024; k+=16) {
-				if (files[k] == idxParent) {
+				if (files[k] == parentIdx) {
 					m = k+2;
 					h;
 					for (h=0; h < i-j-1; h++) {
@@ -156,8 +159,8 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
 							break;
 						}
 					} if (h == i-j-1) {
+						parentIdx = k;
 						isnamaTrue = 1;
-						idxParent = k;
 						break;
 					}
 				}
@@ -171,7 +174,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
 			sudahKetemu = 1;
 
 			for (k=0; k < 1024; k+=16) {
-				if (files[k] == idxParent) {
+				if (files[k] == parentIdx) {
 					m = k+2;
  
 					h;
@@ -188,28 +191,29 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
 			}
 		}
 
-	if (!sudahKetemu) {
-		*sectors = -1;
-		return;
-	} else if (!isnamaAlreadyExists) {
-		*sectors = 2;
-		return;
-	} else {
-		readSector(bufferSector, 0x103);
-		emptySector = 0;
+		if (!isnamaAlreadyExists) {
+			*sectors = 2;
+			return;
+		} else if (!sudahKetemu) {
+			*sectors = -1;
+			return;
+		} else {
+			readSector(bufferSector, 0x103);
+			sektorKosong = 0;
 
-		while (emptySector < 16 && bufferSector[(idxParent + 1) * 16 + emptySector] != '\0') {
-			char buffTemp[512];
-			readSector(&buffTemp, bufferSector[(idxParent + 1) * 16 + emptySector]);
-			for (i = 0; i < 512; i++) {
-				buffer[i + 512 * emptySector] = buffTemp[i];
+			while (bufferSector[(parentIdx + 1) * 16 + sektorKosong] != '\0' && sektorKosong < 16) {
+				char buffTemp[512];
+				readSector(&buffTemp, bufferSector[(parentIdx + 1) * 16 + sektorKosong]);
+				for (i = 0; i < 512; i++) {
+					buffer[i + 512 * sektorKosong] = buffTemp[i];
+				}
+				sektorKosong++;
 			}
-			emptySector++;
-		}
 
-		*sectors = 1;
+			*sectors = 1;
+		}
 	}
-}}
+}
 
 void printString(char *string) {
 char *ret = '\r';
