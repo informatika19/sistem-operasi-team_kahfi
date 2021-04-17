@@ -1,13 +1,4 @@
-# OS Pedas
-**Oleh 0xcabecabe**
-> Terasa pedas, terasa panas
-
-## Manusia-manusia di Balik Kepedasan ini
-Nama | NIM
------|----
-Rehagana Christian Sembiring | 13519117
-Alvin Wilta | 13519163
-Josep Marcello | 13519164
+# Sistem Operasi
 
 ## Milestone
 - [Milestone 1](docs/MILESTONE1.md)
@@ -25,3 +16,5 @@ Josep Marcello | 13519164
 
 ### Install dan jalankan
 `make run`
+
+### Help from K03-0xcabecabe
