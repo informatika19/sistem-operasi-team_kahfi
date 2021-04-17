@@ -12,7 +12,7 @@
 #include "io.h"          // printNumber
 #include "kernel.h"
 #include "lib/boolean.h"
-#include "lib/string.h"
+#include "lib/text/string.h"
 
 int runShell() {
     char command[10 * MAXIMUM_CMD_LEN];  // kalo pointer aja takut error
@@ -25,7 +25,7 @@ int runShell() {
 
     int argc, histc = 0, i;
 
-    strncpy(username, "0xCABECABE", 11);
+    strncpy(username, "team_kahfi", 11);
     atSymb[0] = '@';
     atSymb[1] = 0;
     cwdName[0] = '/';
