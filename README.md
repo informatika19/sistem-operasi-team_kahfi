@@ -11,7 +11,7 @@
 - ld86
 
 ### Jalankan
-Masuk direktori src dan ketika `./run.sh`
+Masuk direktori src dan ketik `./run.sh`
 
 ### Milestone 3
 
@@ -27,7 +27,7 @@ Masuk direktori src dan ketika `./run.sh`
 
 `mkdir [foldername]` 
 
-*not working yet**
+**not working yet**
 
 4. rm
 
@@ -37,7 +37,7 @@ Masuk direktori src dan ketika `./run.sh`
 
 5. cp
 
-Type `cp [source file/foldername] [destination foldername]` in the shell
+`cp [source file/foldername] [destination foldername]`
 
 **not working yet**
 
