@@ -44,6 +44,21 @@ ld86 -o mkdir -d mkdir.o lib_asm.o
 # ld86 -o mv -d mv.o lib_asm.o
 # ./loadFile mv
 
+# Compiling cp
+# bcc -ansi -c cp.c -o cp.o
+# ld86 -o cp -d cp.o lib_asm.o
+# ./loadFile cp
+
+# Compiling ln
+# bcc -ansi -c ln.c -o ln.o
+# ld86 -o ln -d ln.o lib_asm.o
+# ./loadFile ln
+
+# Compiling game
+bcc -ansi -c game.c -o game.o
+ld86 -o game -d game.o lib_asm.o string.o
+./loadFile game
+
 # Loading text untuk test 
 ./loadFile test.txt 
 

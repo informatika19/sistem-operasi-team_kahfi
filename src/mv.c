@@ -1,3 +1,8 @@
+#include "string.h"
+#include "fileIO.h"
+#include "math.h"
+#include "folderIO.h"
+
 void main() {
 	int* indexDir;
 	int length = 512, berhasil;
