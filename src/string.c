@@ -46,6 +46,31 @@ void readString(char *string) {
 	}
 }
 
+unsigned char strcmp(char* strA, char* strB) {
+	int i = 0;
+	unsigned char sama = 1;
+	while (i < 128 && sama) {
+		if(strA[i] != strB[i]) {
+			sama = 0;
+		} else if(strA[i] == 0x0 && strB[i] == 0x0) {
+			i = 128;
+		}
+		++i;
+	}
+	return sama;
+}
+
+int strcmpN(char* strA, char* strB, int n) {
+	int i = 0;
+	while (!(strA[i] == '\0' && strB[i] == '\0') && i < n) {
+		if (strA[i] != strB[i]) {
+            return 0;
+        }
+		++i;
+	}
+	return 1;
+}
+
 void logoHMIF() {
   printString("%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
   printString("%*,,,,,,,,,&&&&&&&&&&&&&&&&&&&&&%%%%&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&%,(");

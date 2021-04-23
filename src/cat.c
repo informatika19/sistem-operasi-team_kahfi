@@ -16,23 +16,23 @@ void main () {
     	i++;
 	}
 
-	//empty Buffer
+	// Mengosongkan Buffer
 	while (i < 512 * 16){
 		fileContent[i] = 0x0;
 		i++;
 	}
-	//read fileContent
+	// Membaca fileContent
 	readFile(fileContent, name, &isSuccess, currDir);
 	
 	switch(isSuccess){
 		case 1 :
-			printString("File content: \r\n\0");
+			printString("Isi file: \r\n\0");
 			printString(fileContent);
 			printString("\r\n\0");
 			break;
 		
 		default :
-			printString("File not found\r\n\0");
+			printString("File tidak ditemukan\r\n\0");
 			break;
 	}
     interrupt(0x21, 0x06, "shell", 0x2000, &isSuccess);

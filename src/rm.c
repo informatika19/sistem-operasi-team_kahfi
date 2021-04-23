@@ -7,20 +7,20 @@ void main() {
 	int i, j, isFound, isNameMatch, idxName, folderFilesEntry, isSuccess;
 	isFound = 0;
 
-	// get parentIdx and filename
+	// Mendapatkan parentIdx and filename
 	interrupt(0x21, 0x02, tempBuff, 512, 0);
     currDir = tempBuff[0];
     for (i = 0; i < 14; i++) {
 		name[i] = tempBuff[i + 1];
 	}
 
-	//read sector 257 and 258 (file/folder)
+	// Membaca sector 257 and 258 (file/folder)
 	interrupt(0x21, 0x02, folderAndFiles, 257, 0);
 	interrupt(0x21, 0x02, folderAndFiles + 512, 258, 0);
 	
 	i = 0;
 	while (!isFound && i < 1024) {
-        // Search for files / folder
+        // Mencari files / folder
         for (i = 0; i < 1024; i += 16) {
 			if (folderAndFiles[i] == currDir) {
 				if (folderAndFiles[i + 2] != 0x0) {
@@ -48,15 +48,15 @@ void main() {
     }
 	
 	if (!isFound) {
-		printString("File/folder not found\r\n\0");
+		printString("File/folder tidak ditemukan\r\n\0");
 	}
 	else {
 		if (folderFilesEntry == 0xFF) {
 			delDir(folderFilesEntry);
-			printString("Folder deleted successfully!\r\n\0");
+			printString("Folder berhasil dihapus!\r\n\0");
 		} else {
 			delFile(folderFilesEntry);
-			printString("File deleted successfully!\r\n\0");
+			printString("File berhasil dihapus!\r\n\0");
 		}
 	}
     interrupt(0x21, 0x06, "shell", 0x2000, &isSuccess);

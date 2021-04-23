@@ -21,7 +21,7 @@ gcc loadFile.c -o loadFile
 # Compiling shell
 bcc -ansi -c -o shell.o shell.c
 nasm -f as86 lib.asm -o lib_asm.o
-ld86 -o shell -d shell.o lib_asm.o
+ld86 -o shell -d shell.o lib_asm.o string.o
 ./loadFile shell
 
 # Compiling cat
@@ -44,12 +44,12 @@ ld86 -o mkdir -d mkdir.o lib_asm.o
 # ld86 -o mv -d mv.o lib_asm.o
 # ./loadFile mv
 
+# Loading text untuk test 
 ./loadFile test.txt 
 
 # Menghapus hasil compile
 rm bochsout.txt bootloader cat cat.o fileIO.o folderIO.o kernel kernel.o kernel_asm.o
 rm lib_asm.o loadFile math.o mkdir mkdir.o rm rm.o shell shell.o string.o
-# rm mv mv.o
 
-# run bochs
+# Menjalankan bochs
 echo c | bochs -f if2230.config
