@@ -14,6 +14,19 @@ void main() {
     for (i = 0; i < 14; i++) {
 		cmd[i] = tempBuff[i + 1];
 	}
+	// while (input[i] != '\0') {
+	// 	if (input[i] == 0x20) {
+	// 		i++;
+	// 		j = i;
+	// 		spaceFound = 1;
+	// 	} else if (spaceFound) {
+	// 		destDir[i - j] = input[i];
+	// 		i++;
+	// 	} else if (!spaceFound) {
+	// 		arg[i - 3] = input[i];
+	// 		i++;
+	// 	}
+	// }
 
 	dirTujuan = *(idxDir);
 	initDir = *(idxDir);
@@ -26,11 +39,10 @@ void main() {
 		files[i] = '\0';
 	}
 	i = 0;
-
 	while (i < 128 && (cmd[i] != 0 && lanjot == 1)) {
 		if(var == 0) {
             if (cmd[i] == 64) {
-				nomorPindah = searchPath(dirDipindah, *idxDir);
+				nomorPindah = lookingPath(dirDipindah, *idxDir);
 				if(nomorPindah != 64) {
 					count = 0;
 					var = 1;
@@ -50,8 +62,9 @@ void main() {
 			}
 		}
 		else if(var == 1) {
+			//cd di tempat tujuan
             if(cmd[i] == 32 || cmd[i] == '/') {
-				nomorPindah = searchPath(directory, dirTujuan);
+				nomorPindah = lookingPath(directory, dirTujuan);
 				if(nomorPindah == 32) {
 					interrupt(0x21, 0, "Gaada cok! : \0",0,0);
 					interrupt(0x21, 0, directory, 0,0);
@@ -65,13 +78,14 @@ void main() {
 				}
 				count = 0;
 			}else if(cmd[i] == '/') {
+				//isi array
 				directory[count] = cmd[i];
 				++count;
 			} 
 		}
 		++i;
 	}
-
+	//sekarang baru mau mindahin :)
 	if(lanjot) {
 		interrupt(0x21, 2, directory, 0x101,0);
 		interrupt(0x21, 3, directory + panjang, 0,0);
@@ -86,3 +100,4 @@ void main() {
 	}
 	interrupt(0x21, 0x06, "shell", 0x2000, &isSuccess);
 }
+

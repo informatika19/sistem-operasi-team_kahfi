@@ -15,41 +15,41 @@ nasm -f as86 kernel.asm -o kernel_asm.o
 ld86 -o kernel -d kernel.o kernel_asm.o math.o string.o fileIO.o folderIO.o
 dd if=kernel of=system.img bs=512 conv=notrunc seek=1
 
-#Compiling loadfile
+# Compiling loadfile
 gcc loadFile.c -o loadFile
 
-#Compiling shell
+# Compiling shell
 bcc -ansi -c -o shell.o shell.c
 nasm -f as86 lib.asm -o lib_asm.o
-ld86 -o shell -d shell.o lib_asm.o string.o
+ld86 -o shell -d shell.o lib_asm.o
 ./loadFile shell
 
-#Compiling cat
+# Compiling cat
 bcc -ansi -c cat.c -o cat.o
 ld86 -o cat -d cat.o lib_asm.o string.o fileIO.o math.o
 ./loadFile cat
 
-#Compiling rm
+# Compiling rm
 bcc -ansi -c rm.c -o rm.o
 ld86 -o rm -d rm.o lib_asm.o string.o fileIO.o folderIO.o math.o
 ./loadFile rm
 
-#Compiling mkdir
+# Compiling mkdir
 bcc -ansi -c mkdir.c -o mkdir.o
 ld86 -o mkdir -d mkdir.o lib_asm.o
 ./loadFile mkdir
 
-#Compiling mv
+# Compiling mv
 # bcc -ansi -c mv.c -o mv.o
 # ld86 -o mv -d mv.o lib_asm.o
 # ./loadFile mv
 
-#Compiling test
-./loadFile tes.txt 
+./loadFile test.txt 
 
-# cleaning compiled files
+# Menghapus hasil compile
 rm bochsout.txt bootloader cat cat.o fileIO.o folderIO.o kernel kernel.o kernel_asm.o
 rm lib_asm.o loadFile math.o mkdir mkdir.o rm rm.o shell shell.o string.o
+# rm mv mv.o
 
 # run bochs
 echo c | bochs -f if2230.config

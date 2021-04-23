@@ -1,3 +1,3 @@
 void main() {
-    // Pasrah
+    char currDir, destDir, filesFolders[1024];
 }

@@ -32,7 +32,7 @@ void main () {
 			break;
 		
 		default :
-			printString("File is not found\r\n\0");
+			printString("File not found\r\n\0");
 			break;
 	}
     interrupt(0x21, 0x06, "shell", 0x2000, &isSuccess);

@@ -1,5 +1,7 @@
 #include "folderIO.h"
 
+// make dir
+
 void delDir(char entry) {
 	char folderAndFiles[1024];
 	int i;
@@ -29,3 +31,5 @@ void delDir(char entry) {
 	 	}
 	}
 }
+
+// list content

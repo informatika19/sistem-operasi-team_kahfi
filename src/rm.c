@@ -1,53 +1,17 @@
 #include "string.h"
 #include "fileIO.h"
 #include "folderIO.h"
-#include "math.h"
-
-void delFile(char entry);
-
-void delFile(char entry) {
-	char mapBuffer[512], folderAndFiles[1024], sectBuffer[512];
-	int i;
-	
-	//read sector 257 and 258
-	interrupt(0x21, 0x02, folderAndFiles, 257, 0);
-	interrupt(0x21, 0x02, folderAndFiles + 512, 258, 0);
-	
-	//delete file entry
-	folderAndFiles[entry * 16] = 0x0;
-	folderAndFiles[entry * 16 + 1] = '\0';
-		
-	//deletion in map and sector
-	interrupt(0x21, 0x02, &mapBuffer, 256, 0);
-	interrupt(0x21, 0x02, &sectBuffer, 259, 0);
-	i = 0;
-	while (sectBuffer[entry * 16 + i] != '\0' && i < 16) {
-		//make it empty
-		mapBuffer[sectBuffer[entry * 16 + i]] = 0x0;
-		sectBuffer[entry * 16 + i] = 0x0;
-		i++;
-	}
-	//rewrite buffer to sectors
-	interrupt(0x21, 0x03, &folderAndFiles, 257, 0);
-	interrupt(0x21, 0x03, folderAndFiles + 512, 258, 0);
-	interrupt(0x21, 0x03, &sectBuffer, 259, 0);
-	interrupt(0x21, 0x03, &mapBuffer, 256, 0);
-}
-
 
 void main() {
     char name[14], folderAndFiles[512*2], tempBuff[512], currDir;
-	int isNameMatch, idxName, folderFilesEntry, isSuccess;
-	int isFound = 0;
-	int i = 0;
-	int j = 0;
+	int i, j, isFound, isNameMatch, idxName, folderFilesEntry, isSuccess;
+	isFound = 0;
 
 	// get parentIdx and filename
 	interrupt(0x21, 0x02, tempBuff, 512, 0);
     currDir = tempBuff[0];
-    while (i < 14){
-    	name[i] = tempBuff[i + 1];
-    	i++;
+    for (i = 0; i < 14; i++) {
+		name[i] = tempBuff[i + 1];
 	}
 
 	//read sector 257 and 258 (file/folder)
@@ -64,16 +28,15 @@ void main() {
                 
                 	//matching name
                 	isNameMatch = 1;
-                	while (j < 14){
+	                for (j = 0; j < 14; j++) {
     	                if (name[j] != folderAndFiles[j + idxName]) {
         	                isNameMatch = 0;
 							break;
-						}
-						else if (folderAndFiles[j + idxName] == '\0' && name[j] == '\0'){
-							break;
-						}
-						j++;
-					}
+                	    } else if (folderAndFiles[j + idxName] == '\0' && name[j] == '\0') {
+                    		break;
+                    	}
+                	}
+
                 	if (isNameMatch) {
                     	isFound = 1;
                     	folderFilesEntry = folderAndFiles[i + 1];
@@ -85,17 +48,15 @@ void main() {
     }
 	
 	if (!isFound) {
-		printString("File/folder is not found\r\n\0");
+		printString("File/folder not found\r\n\0");
 	}
 	else {
-		
-		switch (folderFilesEntry){
-			case 0xFF :
-				delDir(folderFilesEntry);
-				printString("Folder is successfully deleted!\r\n\0");
-			default :
-				delFile(folderFilesEntry);
-				printString("File is successfully deleted!\r\n\0");							
+		if (folderFilesEntry == 0xFF) {
+			delDir(folderFilesEntry);
+			printString("Folder deleted successfully!\r\n\0");
+		} else {
+			delFile(folderFilesEntry);
+			printString("File deleted successfully!\r\n\0");
 		}
 	}
     interrupt(0x21, 0x06, "shell", 0x2000, &isSuccess);

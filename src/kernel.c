@@ -8,7 +8,7 @@ void executeProgram(char *filename, int segment, int *success);
 int main() {
 	int suc;
 
-	printLogo();
+	logoHMIF();
 	makeInterrupt21();
 	handleInterrupt21(0XFF06, "shell", 0x2000, &suc);
 	
@@ -39,7 +39,7 @@ void handleInterrupt21 (int AX, int BX, int CX, int DX) {
 			writeFile(BX, CX, DX, AH);
 			break;
 		case 0x06:
-			executeProgram(BX, CX, DX);
+			executeProgram(BX, CX, DX, AH);
 			break;
 		default:
 			printString("Invalid interrupt");
