@@ -9,12 +9,40 @@
 - bcc
 - bochs
 - ld86
-- GNU make
 
-### Install saja
-`make`
+### Jalankan
+Masuk direktori src dan ketika `./run.sh`
 
-### Install dan jalankan
-`make run`
+### Milestone 3
+
+1. cat
+
+`cat [file/foldername]` 
+
+2. rm
+
+`rm [file/foldername]` 
+
+3. mkdir
+
+`mkdir [foldername]` 
+
+*not working yet**
+
+4. rm
+
+`rm [source file/foldername] [destination foldername]` 
+
+**not working yet**
+
+5. cp
+
+Type `cp [source file/foldername] [destination foldername]` in the shell
+
+**not working yet**
+
+6. rm
+
+`mv [source file/foldername] [destination foldername]` 
 
 ### Help from K03-0xcabecabe
