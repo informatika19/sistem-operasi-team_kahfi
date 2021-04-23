@@ -1,0 +1,1 @@
+void delDir(char entry);
