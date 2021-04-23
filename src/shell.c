@@ -180,24 +180,25 @@ int cd(char* cmd, int idxDir) {
 		directory[i] = '\0';
 	}
 	i = 0;
-	while (i<128 && cmd[i] != '\0' && cont == 1) {
-		if (cmd[i] != '/') {
+	while(i<128 && cmd[i] != '\0' && cont == 1) {
+		if(cmd[i] != '/') {
 			directory[cnt] = cmd[i];
 			cnt++;
-		} else if (cmd[i] == '/') {
+		} else if(cmd[i] == '/') {
 			val = lookingPath(directory, initDir);
 			if(val == 0x100) {
 				cont = 0;
 			} else {
+				interrupt(0x21, 0, "Berhasil pindah directory\r\n",0,0);
 				initDir = val;
 				currentDirName[namaDir++] = '/';
 				k = 0;
 				while (k < 14 ) {
-					if (bufferDir[initDir * 16 + 2 + k] != '\0') {
+					if (bufferDir[initDir * 16 + 2 + k] == '\0') {
+						break;
+					} else {
 						currentDirName[namaDir + k] = bufferDir[k + initDir * 16 + 2];
 						k++;
-					} else {
-						break;
 					}
 				}
 				namaDir += k;
@@ -206,20 +207,20 @@ int cd(char* cmd, int idxDir) {
 		}
 		i++;
 	}
-
 	if (cont) {
 		val = lookingPath(directory, initDir);
-		if (val == 0x100) {
-			if (backDir == 0) {
+		if (val != 0x100) {
+			interrupt(0x21, 0, "Berhasil pindah directory\r\n",0,0);
+			if (backDir ==0) {
 				initDir = val;
 				currentDirName[namaDir++] = '/';
 				k = 0;
-				while (k < 14) {
-					if (bufferDir[initDir * 16 + 2 + k] != '\0') {
+				while (k < 14 ) {
+					if (bufferDir[initDir * 16 + 2 + k] == '\0') {
+						break;
+					} else {
 						currentDirName[namaDir + k] = bufferDir[k + initDir * 16 + 2];
 						k++;
-					} else {
-						break;
 					}
 				}
 				namaDir += k;
