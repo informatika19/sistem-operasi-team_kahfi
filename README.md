@@ -27,21 +27,21 @@ Masuk direktori src dan ketik `./run.sh`
 
 `mkdir [foldername]` 
 
+4. cd
+
+`cd [foldername]` 
+
+5. ln
+
 **not working yet**
 
-4. rm
-
-`rm [source file/foldername] [destination foldername]` 
-
-**not working yet**
-
-5. cp
+6. cp
 
 `cp [source file/foldername] [destination foldername]`
 
 **not working yet**
 
-6. rm
+7. mv
 
 `mv [source file/foldername] [destination foldername]` 
 
